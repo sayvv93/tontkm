@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard theo dõi tồn — Triển khai mới DNI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{
+    --ink:#1c2430;
+    --ink-soft:#5b6472;
+    --paper:#f6f5f2;
+    --panel:#ffffff;
+    --line:#e4e1da;
+    --brand:#e6631f;      /* cam FPT, dùng làm accent duy nhất */
+    --ok:#1f8a5f;
+    --warn:#c8801a;
+    --danger:#c0392b;
+    --danger-bg:#fbeae8;
+    --warn-bg:#fcf1de;
+    --ok-bg:#e9f6ef;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.5;
+  }
+  header{
+    background:var(--ink); color:#fff; padding:22px 32px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  header .title{display:flex; flex-direction:column; gap:2px;}
+  header h1{margin:0; font-size:20px; font-weight:700; letter-spacing:-0.01em;}
+  header .sub{font-size:13px; color:#b9c0c9;}
+  header .meta{display:flex; align-items:center; gap:16px; font-size:13px; color:#c9cfd6;}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--ok); display:inline-block; margin-right:6px;}
+  #refreshBtn{
+    background:var(--brand); color:#fff; border:none; padding:8px 16px; border-radius:8px;
+    font-size:13px; font-weight:600; cursor:pointer;
+  }
+  #refreshBtn:hover{opacity:.9;}
+  main{padding:28px 32px; max-width:1400px; margin:0 auto;}
+
+  .kpi-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:14px; margin-bottom:28px;
+  }
+  .kpi{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px; position:relative; overflow:hidden;
+  }
+  .kpi .num{font-size:28px; font-weight:800; letter-spacing:-0.02em; line-height:1;}
+  .kpi .label{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+  .kpi.total .num{color:var(--ink);}
+  .kpi.overdue{background:var(--danger-bg); border-color:#f0cfc9;}
+  .kpi.overdue .num{color:var(--danger);}
+  .kpi.today{background:var(--warn-bg); border-color:#f1decb;}
+  .kpi.today .num{color:var(--warn);}
+  .kpi.t1{background:#eaf1fb; border-color:#cddef4;}
+  .kpi.t1 .num{color:#215ea8;}
+  .kpi.t2{background:#eef2f2; border-color:#d3dedc;}
+  .kpi.t2 .num{color:#3a6b63;}
+  .kpi.far{background:#f2f1ee; border-color:var(--line);}
+  .kpi.far .num{color:var(--ink-soft);}
+
+  .panels{display:grid; grid-template-columns: 1.3fr 1fr; gap:16px; margin-bottom:24px;}
+  @media(max-width:900px){.panels{grid-template-columns:1fr;}}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+  .panel h2{margin:0 0 14px; font-size:14px; font-weight:700; color:var(--ink);}
+
+  .table-toolbar{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;
+  }
+  .table-toolbar input, .table-toolbar select{
+    border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13px;
+    background:#fff; color:var(--ink); font-family:inherit;
+  }
+  .table-toolbar input[type=text]{flex:1; min-width:180px;}
+
+  .table-wrap{overflow:auto; border:1px solid var(--line); border-radius:var(--radius); max-height:640px;}
+  table{width:100%; border-collapse:collapse; font-size:13px; white-space:nowrap;}
+  thead th{
+    position:sticky; top:0; background:#fbfaf8; text-align:left; padding:10px 12px;
+    border-bottom:1px solid var(--line); font-weight:600; color:var(--ink-soft); cursor:pointer;
+  }
+  tbody td{padding:9px 12px; border-bottom:1px solid #eeece6; white-space:normal; max-width:220px;}
+  tbody td.col-ghichu{min-width:420px; max-width:none;}
+  tbody tr:hover{background:#faf9f6;}
+  .badge{display:inline-block; padding:3px 9px; border-radius:20px; font-size:12px; font-weight:600;}
+  .badge.overdue{background:var(--danger-bg); color:var(--danger);}
+  .badge.today{background:var(--warn-bg); color:var(--warn);}
+  .badge.t1{background:#eaf1fb; color:#215ea8;}
+  .badge.t2{background:#eef2f2; color:#3a6b63;}
+  .badge.far{background:#f2f1ee; color:var(--ink-soft);}
+  .badge.done{background:#eef0f2; color:#8b93a1;}
+  .load-badge{display:inline-block; margin-left:6px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; background:#eef0f2; color:var(--ink-soft); white-space:nowrap;}
+  .load-badge.over{background:var(--danger-bg); color:var(--danger);}
+
+  #emptyState, #errState{padding:40px; text-align:center; color:var(--ink-soft); display:none;}
+  #errState{color:var(--danger);}
+  .footer-note{font-size:12px; color:var(--ink-soft); text-align:center; margin-top:20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <h1>Dashboard theo dõi tồn <span style="color:var(--brand);">— Triển khai mới DNI</span></h1>
+    <span class="sub">Cập nhật trực tiếp từ Google Sheet TonTKM</span>
+  </div>
+  <div class="meta">
+    <span><span class="dot" id="statusDot"></span><span id="lastUpdated">Đang tải…</span></span>
+    <button id="refreshBtn" onclick="loadData()">Làm mới</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="kpi-grid">
+    <div class="kpi total">
+      <div class="num" id="kpiTotal">–</div>
+      <div class="label">Tổng tồn xử lý</div>
+    </div>
+    <div class="kpi overdue">
+      <div class="num" id="kpiOverdue">–</div>
+      <div class="label">Quá hạn cam kết</div>
+    </div>
+    <div class="kpi today">
+      <div class="num" id="kpiToday">–</div>
+      <div class="label">Đến hạn hôm nay</div>
+    </div>
+    <div class="kpi t1">
+      <div class="num" id="kpiT1">–</div>
+      <div class="label">Đến hạn T+1 (ngày mai)</div>
+    </div>
+    <div class="kpi t2">
+      <div class="num" id="kpiT2">–</div>
+      <div class="label">Đến hạn T+2</div>
+    </div>
+    <div class="kpi far">
+      <div class="num" id="kpiFar">–</div>
+      <div class="label">Chưa đến hạn (tồn xa)</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:24px;">
+    <h2>Tồn xử lý theo Đối tác — chia theo mức độ khẩn</h2>
+    <canvas id="chartDoiTac" height="110"></canvas>
+  </div>
+
+  <div class="panel">
+    <h2>Danh sách chi tiết</h2>
+    <div class="table-toolbar">
+      <input type="text" id="searchBox" placeholder="Tìm theo Số HĐ, tên KH, nhân sự…" oninput="renderTable()">
+      <select id="filterAlert" onchange="renderTable()">
+        <option value="">Tất cả cảnh báo</option>
+        <option value="overdue">Quá hạn</option>
+        <option value="today">Đến hạn hôm nay</option>
+        <option value="t1">Đến hạn T+1</option>
+        <option value="t2">Đến hạn T+2</option>
+        <option value="far">Chưa đến hạn</option>
+        <option value="done">Đã xong</option>
+      </select>
+      <select id="filterDoiTac" onchange="renderTable()">
+        <option value="">Tất cả đối tác</option>
+      </select>
+      <select id="filterNhanSu" onchange="renderTable()">
+        <option value="">Tất cả nhân sự</option>
+      </select>
+      <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft); white-space:nowrap;">
+        <input type="checkbox" id="onlyOverload" onchange="renderTable()">
+        Chỉ nhân sự quá tải (&gt; <span id="overloadThresholdLabel"></span> ca)
+      </label>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Số HĐ</th><th>Đối tác</th><th>Sale HĐ</th><th>Nhân sự</th>
+            <th>Hẹn xanh</th><th>Hẹn đỏ</th><th>Cảnh báo</th><th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="emptyState">Không có dòng nào khớp bộ lọc.</div>
+      <div id="errState"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">Dữ liệu được cache tối đa vài phút qua Cloudflare Worker · Tự làm mới mỗi 2 phút</div>
+</main>
+
+<script>
+// ĐỔI URL NÀY thành worker.dev URL của bạn sau khi deploy worker.js
+const WORKER_URL = 'https://tontkm.sayvv93.workers.dev';
+
+let allRows = [];
+let sortState = { col: null, dir: 1 };
+let chartDoiTac;
+let nhanSuLoadMap = {};
+const OVERLOAD_THRESHOLD = 4; // 1 nhân sự đang cầm NHIỀU HƠN 4 ca tồn (tức >= 5) -> cảnh báo quá tải (chỉnh số này nếu muốn)
+
+const ALERT_LABEL = { overdue:'Quá hạn', today:'Hôm nay', t1:'T+1', t2:'T+2', far:'Tồn xa', done:'Đã xong' };
+
+function computeNhanSuLoad(){
+  nhanSuLoadMap = {};
+  allRows.filter(r => !r.isDone).forEach(r => {
+    const k = (r.nhanSu || '').trim();
+    if(!k) return;
+    nhanSuLoadMap[k] = (nhanSuLoadMap[k] || 0) + 1;
+  });
+}
+
+document.getElementById('overloadThresholdLabel').textContent = OVERLOAD_THRESHOLD;
+
+async function loadData(){
+  document.getElementById('lastUpdated').textContent = 'Đang tải…';
+  try{
+    const res = await fetch(WORKER_URL, { cache:'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    allRows = data.rows || [];
+    document.getElementById('statusDot').style.background = '#1f8a5f';
+    document.getElementById('lastUpdated').textContent =
+      'Cập nhật lúc ' + new Date(data.generatedAt).toLocaleString('vi-VN');
+
+    populateDoiTacFilter();
+    populateNhanSuFilter();
+    computeNhanSuLoad();
+    renderKPIs();
+    renderCharts();
+    renderTable();
+    document.getElementById('errState').style.display = 'none';
+  }catch(err){
+    document.getElementById('statusDot').style.background = '#c0392b';
+    document.getElementById('lastUpdated').textContent = 'Lỗi tải dữ liệu';
+    const errBox = document.getElementById('errState');
+    errBox.style.display = 'block';
+    errBox.textContent = 'Không tải được dữ liệu: ' + err.message + ' — kiểm tra WORKER_URL trong file HTML.';
+  }
+}
+
+function renderKPIs(){
+  const active = allRows.filter(r => !r.isDone);
+  document.getElementById('kpiTotal').textContent = active.length;
+  document.getElementById('kpiOverdue').textContent = active.filter(r=>r.alert==='overdue').length;
+  document.getElementById('kpiToday').textContent = active.filter(r=>r.alert==='today').length;
+  document.getElementById('kpiT1').textContent = active.filter(r=>r.alert==='t1').length;
+  document.getElementById('kpiT2').textContent = active.filter(r=>r.alert==='t2').length;
+  document.getElementById('kpiFar').textContent = active.filter(r=>r.alert==='far').length;
+}
+
+function groupCount(rows, key){
+  const m = {};
+  rows.forEach(r=>{
+    const k = (r[key] || 'Không rõ').trim() || 'Không rõ';
+    m[k] = (m[k]||0)+1;
+  });
+  return m;
+}
+
+Chart.register(ChartDataLabels);
+
+const ALERT_COLORS = { overdue:'#c0392b', today:'#c8801a', t1:'#2f6fb3', t2:'#2f8f7a', far:'#9aa3ad' };
+const ALERT_ORDER = ['overdue','today','t1','t2','far'];
+
+// Plugin tự vẽ tổng số lên đỉnh mỗi cột chồng
+const totalLabelPlugin = {
+  id: 'totalLabelPlugin',
+  afterDatasetsDraw(chart){
+    const ctx = chart.ctx;
+    const lastDatasetIndex = chart.data.datasets.length - 1;
+    const meta = chart.getDatasetMeta(lastDatasetIndex);
+    chart.data.labels.forEach((label, i) => {
+      let total = 0;
+      chart.data.datasets.forEach(ds => total += (ds.data[i] || 0));
+      if(total === 0) return;
+      const el = meta.data[i];
+      if(!el) return;
+      ctx.save();
+      ctx.fillStyle = '#1c2430';
+      ctx.font = '700 13px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(total, el.x, el.y - 8);
+      ctx.restore();
+    });
+  }
+};
+
+function renderCharts(){
+  const active = allRows.filter(r => !r.isDone);
+
+  const partners = [...new Set(active.map(r => (r.doiTac || 'Không rõ').trim() || 'Không rõ'))].sort();
+
+  const datasets = ALERT_ORDER.map(key => ({
+    label: ALERT_LABEL[key],
+    data: partners.map(p => active.filter(r => ((r.doiTac || 'Không rõ').trim() || 'Không rõ') === p && r.alert === key).length),
+    backgroundColor: ALERT_COLORS[key],
+    stack: 'tonxuly'
+  }));
+
+  if(chartDoiTac) chartDoiTac.destroy();
+  chartDoiTac = new Chart(document.getElementById('chartDoiTac'), {
+    type:'bar',
+    data:{ labels:partners, datasets },
+    plugins:[totalLabelPlugin],
+    options:{
+      plugins:{
+        legend:{ position:'bottom', labels:{ boxWidth:12, padding:16, font:{size:12} } },
+        datalabels:{
+          display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+          color:'#fff', font:{weight:'700', size:11}, formatter:v=>v
+        }
+      },
+      scales:{
+        x:{ stacked:true },
+        y:{ stacked:true, beginAtZero:true, ticks:{precision:0}, grace:'10%' }
+      }
+    }
+  });
+}
+
+function populateDoiTacFilter(){
+  const sel = document.getElementById('filterDoiTac');
+  const current = sel.value;
+  const values = [...new Set(allRows.map(r=>r.doiTac).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Tất cả đối tác</option>' +
+    values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  sel.value = current;
+}
+
+function populateNhanSuFilter(){
+  const sel = document.getElementById('filterNhanSu');
+  const current = sel.value;
+  const values = [...new Set(allRows.map(r=>r.nhanSu).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Tất cả nhân sự</option>' +
+    values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  sel.value = current;
+}
+
+function renderTable(){
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const alertFilter = document.getElementById('filterAlert').value;
+  const doiTacFilter = document.getElementById('filterDoiTac').value;
+  const nhanSuFilter = document.getElementById('filterNhanSu').value;
+  const onlyOverload = document.getElementById('onlyOverload').checked;
+
+  let rows = allRows.filter(r=>{
+    if(alertFilter && r.alert !== alertFilter) return false;
+    if(doiTacFilter && r.doiTac !== doiTacFilter) return false;
+    if(nhanSuFilter && r.nhanSu !== nhanSuFilter) return false;
+    if(onlyOverload){
+      const load = nhanSuLoadMap[(r.nhanSu||'').trim()] || 0;
+      if(load <= OVERLOAD_THRESHOLD) return false;
+    }
+    if(q){
+      const hay = [r.soHD, r.tenKH, r.nhanSu, r.doiTac].join(' ').toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  if(sortState.col){
+    rows = rows.slice().sort((a,b)=>{
+      const av = (a[sortState.col]||'').toString();
+      const bv = (b[sortState.col]||'').toString();
+      return av.localeCompare(bv) * sortState.dir;
+    });
+  }
+
+  const tbody = document.getElementById('tableBody');
+  const emptyState = document.getElementById('emptyState');
+
+  if(rows.length === 0){
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${escapeHtml(r.soHD)}</td>
+      <td>${escapeHtml(r.doiTac)}</td>
+      <td>${escapeHtml(r.saleHD)}</td>
+      <td>${escapeHtml(r.nhanSu)}${renderLoadBadge(r.nhanSu)}</td>
+      <td>${escapeHtml(r.henXanh)}</td>
+      <td>${escapeHtml(r.henDo)}</td>
+      <td><span class="badge ${r.alert}">${ALERT_LABEL[r.alert] || r.alert}</span></td>
+      <td class="col-ghichu">${escapeHtml(r.ghiChu)}</td>
+    </tr>
+  `).join('');
+}
+
+document.querySelectorAll('thead th').forEach((th, i) => {
+  const cols = ['soHD','doiTac','saleHD','nhanSu','henXanh','henDo','alert','ghiChu'];
+  th.addEventListener('click', () => {
+    sortState = { col: cols[i], dir: sortState.col === cols[i] ? -sortState.dir : 1 };
+    renderTable();
+  });
+});
+
+function renderLoadBadge(nhanSu){
+  const k = (nhanSu || '').trim();
+  const load = k ? (nhanSuLoadMap[k] || 0) : 0;
+  if(load <= 1) return ''; // 0-1 ca thì không cần hiện, tránh rối bảng
+  const over = load > OVERLOAD_THRESHOLD;
+  return `<span class="load-badge${over ? ' over' : ''}" title="${k} đang cầm ${load} ca tồn">${load} ca</span>`;
+}
+
+function escapeHtml(v){
+  if(v === null || v === undefined) return '';
+  return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadData();
+setInterval(loadData, 120000); // tự làm mới mỗi 2 phút
+</script>
+</body>
+</html>
