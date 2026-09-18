@@ -30,14 +30,16 @@
     font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.5;
   }
   header{
-    background:var(--ink); color:#fff; padding:22px 32px;
+    background:linear-gradient(135deg, #1c2430 0%, #222b38 55%, #262c39 100%);
+    color:#fff; padding:24px 32px;
     display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    border-bottom:3px solid var(--brand);
   }
-  header .title{display:flex; flex-direction:column; gap:2px;}
-  header h1{margin:0; font-size:20px; font-weight:700; letter-spacing:-0.01em;}
-  header .sub{font-size:13px; color:#b9c0c9;}
+  header .title{display:flex; flex-direction:column; gap:4px;}
+  header h1{margin:0; font-size:21px; font-weight:700; letter-spacing:-0.01em;}
+  header .sub{font-size:13px; color:#c3cad3;}
   header .meta{display:flex; align-items:center; gap:16px; font-size:13px; color:#c9cfd6;}
-  .dot{width:8px; height:8px; border-radius:50%; background:var(--ok); display:inline-block; margin-right:6px;}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--ok); display:inline-block; margin-right:6px; box-shadow:0 0 0 3px rgba(31,138,95,.18);}
   #refreshBtn{
     background:var(--brand); color:#fff; border:none; padding:8px 16px; border-radius:8px;
     font-size:13px; font-weight:600; cursor:pointer;
@@ -50,7 +52,7 @@
   }
   .kpi{
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px 18px; position:relative; overflow:hidden;
+    padding:16px 18px; position:relative; overflow:hidden; box-shadow:0 1px 2px rgba(28,36,48,.04);
   }
   .kpi .num{font-size:28px; font-weight:800; letter-spacing:-0.02em; line-height:1;}
   .kpi .label{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
@@ -66,9 +68,7 @@
   .kpi.far{background:#f2f1ee; border-color:var(--line);}
   .kpi.far .num{color:var(--ink-soft);}
 
-  .panels{display:grid; grid-template-columns: 1.3fr 1fr; gap:16px; margin-bottom:24px;}
-  @media(max-width:900px){.panels{grid-template-columns:1fr;}}
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; box-shadow:0 1px 2px rgba(28,36,48,.04);}
   .panel h2{margin:0 0 14px; font-size:14px; font-weight:700; color:var(--ink);}
 
   .table-toolbar{
@@ -79,6 +79,19 @@
     background:#fff; color:var(--ink); font-family:inherit;
   }
   .table-toolbar input[type=text]{flex:1; min-width:180px;}
+
+  .tk-filter-panel{margin-bottom:20px;}
+  .tk-filter-panel h2{margin-bottom:12px;}
+  .tk-filter-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .tk-btn{
+    border:1px solid var(--line); background:#fbfaf8; color:var(--ink-soft);
+    padding:8px 16px; border-radius:8px; font-size:13.5px; font-weight:600;
+    cursor:pointer; white-space:nowrap; transition:background .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .tk-btn:hover{background:#f0eee8; border-color:#d8d5cc;}
+  .tk-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .tk-btn .count{opacity:.65; font-weight:600; margin-left:6px;}
+  .tk-btn.active .count{opacity:.85;}
 
   .table-wrap{overflow:auto; border:1px solid var(--line); border-radius:var(--radius); max-height:640px;}
   table{width:100%; border-collapse:collapse; font-size:13px; white-space:nowrap;}
@@ -102,6 +115,57 @@
   #emptyState, #errState{padding:40px; text-align:center; color:var(--ink-soft); display:none;}
   #errState{color:var(--danger);}
   .footer-note{font-size:12px; color:var(--ink-soft); text-align:center; margin-top:20px;}
+
+  .dash-tabs{display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--line);}
+  .dash-tab-btn{
+    border:none; background:none; padding:10px 16px; font-size:14px; font-weight:600;
+    color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .dash-tab-btn:hover{color:var(--ink);}
+  .dash-tab-btn.active{color:var(--brand); border-bottom-color:var(--brand);}
+
+  table.kv-matrix{width:100%; border-collapse:collapse; font-size:11.5px; line-height:1.2;}
+  table.kv-matrix th{
+    background:#fbfaf8; padding:5px 8px; text-align:right; border-bottom:1px solid var(--line);
+    font-weight:600; color:var(--ink-soft);
+  }
+  table.kv-matrix th:first-child{text-align:left;}
+  table.kv-matrix td{padding:3px 8px; border-bottom:1px solid #eeece6; text-align:right;}
+  table.kv-matrix td:first-child{text-align:left;}
+  table.kv-matrix tr.kv-group-header td{background:#fdf3df; font-weight:700; color:#8a6d1d;}
+  table.kv-matrix tr.kv-group-header td:first-child{text-align:left;}
+  table.kv-matrix tr.kv-subtotal td{background:#f5f4f0; font-weight:700;}
+  table.kv-matrix tr.kv-grandtotal td{background:var(--ink); color:#fff; font-weight:800;}
+  table.kv-matrix td.kv-overdue{color:var(--danger); font-weight:700;}
+  table.kv-matrix td.kv-today{color:var(--warn); font-weight:700;}
+  table.kv-matrix td.kv-t1{color:#215ea8; font-weight:700;}
+  table.kv-matrix td.kv-t2{color:#3a6b63; font-weight:700;}
+  table.kv-matrix td.kv-far{color:var(--ink-soft); font-weight:700;}
+  table.kv-matrix td.kv-total{font-weight:800; color:var(--ink);}
+  #khuVucMatrixWrap .table-wrap{max-height:none;}
+
+  .table-wrap{-webkit-overflow-scrolling:touch;}
+  .dash-tabs{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .dash-tab-btn{flex:0 0 auto;}
+
+  @media (max-width:640px){
+    header{padding:16px 18px;}
+    header h1{font-size:17px;}
+    header .sub{font-size:12px;}
+    header .meta{font-size:12px; gap:10px;}
+    #refreshBtn{padding:7px 12px; font-size:12.5px;}
+    main{padding:16px;}
+    .kpi-grid{grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:10px; margin-bottom:20px;}
+    .kpi{padding:12px 14px;}
+    .kpi .num{font-size:22px;}
+    .kpi .label{font-size:11.5px;}
+    .panel{padding:14px 14px;}
+    .tk-btn{padding:7px 12px; font-size:12.5px;}
+    .table-toolbar input[type=text]{min-width:100%;}
+    .table-toolbar select, .table-toolbar label{width:100%;}
+    table{font-size:12px;}
+    table.kv-matrix{font-size:10.5px;}
+  }
 </style>
 </head>
 <body>
@@ -109,7 +173,6 @@
 <header>
   <div class="title">
     <h1>Dashboard theo dõi tồn <span style="color:var(--brand);">— Triển khai mới DNI</span></h1>
-    <span class="sub">Cập nhật trực tiếp từ Google Sheet TonTKM</span>
     <span class="sub">Tồn cập nhật vào các khung giờ: 8h · 10h · 12h · 14h · 16h · 18h</span>
   </div>
   <div class="meta">
@@ -119,6 +182,18 @@
 </header>
 
 <main>
+
+  <div class="dash-tabs">
+    <button class="dash-tab-btn active" id="tabBtnOverview" onclick="switchTab('overview')">Tổng quan</button>
+    <button class="dash-tab-btn" id="tabBtnKhuVuc" onclick="switchTab('khuvuc')">Triển khai mới CNB</button>
+  </div>
+
+  <div id="tab-overview" class="dash-tab-content">
+
+  <div class="panel tk-filter-panel">
+    <h2>Lọc theo loại triển khai</h2>
+    <div class="tk-filter-row" id="tkFilterRow"></div>
+  </div>
 
   <div class="kpi-grid">
     <div class="kpi total">
@@ -148,11 +223,9 @@
   </div>
 
   <div class="panel" style="margin-bottom:24px;">
-    <h2>Tồn xử lý theo Đối tác — chia theo mức độ khẩn</h2>
+    <h2>Tồn xử lý theo Khu vực — chia theo mức độ khẩn</h2>
     <canvas id="chartDoiTac" height="110"></canvas>
   </div>
-
-
 
   <div class="panel">
     <h2>Danh sách chi tiết</h2>
@@ -193,6 +266,15 @@
     </div>
   </div>
 
+  </div>
+
+  <div id="tab-khuvuc" class="dash-tab-content" style="display:none;">
+    <div class="panel">
+      <h2>Ma trận Khu vực — Triển khai mới (Onnet · CNB) theo mức độ khẩn</h2>
+      <div id="khuVucMatrixWrap"></div>
+    </div>
+  </div>
+
   <div class="footer-note">Dữ liệu được cache tối đa vài phút qua Cloudflare Worker · Tự làm mới mỗi 2 phút</div>
 </main>
 
@@ -201,7 +283,9 @@
 const WORKER_URL = 'https://tontkm.sayvv93.workers.dev';
 
 let allRows = [];
+let nonDoneRows = []; // cache allRows.filter(!isDone), tính lại 1 lần mỗi khi loadData, không tính lại mỗi lần render
 let sortState = { col: null, dir: 1 };
+let activeTKFilter = ''; // '' = Tất cả
 let chartDoiTac;
 let nhanSuLoadMap = {};
 const OVERLOAD_THRESHOLD = 4; // 1 nhân sự đang cầm NHIỀU HƠN 4 ca tồn (tức >= 5) -> cảnh báo quá tải (chỉnh số này nếu muốn)
@@ -210,7 +294,7 @@ const ALERT_LABEL = { overdue:'Quá hạn', today:'Hôm nay', t1:'T+1', t2:'T+2'
 
 function computeNhanSuLoad(){
   nhanSuLoadMap = {};
-  allRows.filter(r => !r.isDone).forEach(r => {
+  nonDoneRows.forEach(r => {
     const k = (r.nhanSu || '').trim();
     if(!k) return;
     nhanSuLoadMap[k] = (nhanSuLoadMap[k] || 0) + 1;
@@ -228,16 +312,28 @@ async function loadData(){
     if(data.error) throw new Error(data.error);
 
     allRows = data.rows || [];
+
+    // Tính trước các trường suy ra 1 LẦN DUY NHẤT khi tải dữ liệu, thay vì tính lại
+    // mỗi lần render (trước đây classifyTrienKhai/getKhuVuc bị gọi lại hàng trăm lần
+    // mỗi khi bấm lọc hoặc mỗi 2 phút tự làm mới - giờ chỉ tính 1 lần/dòng)
+    allRows.forEach(r => {
+      r.tkCategory = classifyTrienKhai(r);
+      r.khuVuc = getKhuVuc(r);
+    });
+    nonDoneRows = allRows.filter(r => !r.isDone);
+
     document.getElementById('statusDot').style.background = '#1f8a5f';
     document.getElementById('lastUpdated').textContent =
       'Cập nhật lúc ' + new Date(data.generatedAt).toLocaleString('vi-VN');
 
     populateDoiTacFilter();
     populateNhanSuFilter();
+    renderTKFilterRow();
     computeNhanSuLoad();
     renderKPIs();
     renderCharts();
     renderTable();
+    renderKhuVucMatrix();
     document.getElementById('errState').style.display = 'none';
   }catch(err){
     document.getElementById('statusDot').style.background = '#c0392b';
@@ -248,23 +344,20 @@ async function loadData(){
   }
 }
 
+// Danh sách "đang xử lý", đã áp dụng bộ lọc loại triển khai đang chọn (nếu có) -
+// dùng chung cho KPI, biểu đồ và bảng chi tiết để tất cả đồng bộ theo lựa chọn
+function getActiveRows(){
+  return nonDoneRows.filter(r => !activeTKFilter || r.tkCategory === activeTKFilter);
+}
+
 function renderKPIs(){
-  const active = allRows.filter(r => !r.isDone);
+  const active = getActiveRows();
   document.getElementById('kpiTotal').textContent = active.length;
   document.getElementById('kpiOverdue').textContent = active.filter(r=>r.alert==='overdue').length;
   document.getElementById('kpiToday').textContent = active.filter(r=>r.alert==='today').length;
   document.getElementById('kpiT1').textContent = active.filter(r=>r.alert==='t1').length;
   document.getElementById('kpiT2').textContent = active.filter(r=>r.alert==='t2').length;
   document.getElementById('kpiFar').textContent = active.filter(r=>r.alert==='far').length;
-}
-
-function groupCount(rows, key){
-  const m = {};
-  rows.forEach(r=>{
-    const k = (r[key] || 'Không rõ').trim() || 'Không rõ';
-    m[k] = (m[k]||0)+1;
-  });
-  return m;
 }
 
 Chart.register(ChartDataLabels);
@@ -295,14 +388,75 @@ const totalLabelPlugin = {
   }
 };
 
-function renderCharts(){
-  const active = allRows.filter(r => !r.isDone);
+// Tra cứu Khu vực theo Block (cột F), dùng để nhóm biểu đồ chi tiết hơn Đối tác
+const BLOCK_TO_KHUVUC = {
+  'Phuong Trang Dai-001': 'Bien Hoa 01', 'Phuong Bien Hoa-001': 'Bien Hoa 01',
+  'Phuong Tan Trieu-002': 'Bien Hoa 01', 'Phuong Trang Dai-002': 'Bien Hoa 01',
+  'Phuong Tran Bien-003': 'Bien Hoa 01', 'Phuong Tan Trieu-001': 'Bien Hoa 01',
+  'Phuong Tran Bien-002': 'Bien Hoa 01',
+  'Phuong Tam Hiep-001': 'Bien Hoa 02', 'Phuong Long Binh-003': 'Bien Hoa 02',
+  'Phuong Long Binh-002': 'Bien Hoa 02', 'Phuong Phuoc Tan-001': 'Bien Hoa 02',
+  'Phuong Tam Hiep-003': 'Bien Hoa 02', 'Phuong Long Hung-001': 'Bien Hoa 02',
+  'Phuong Tam Phuoc-001': 'Bien Hoa 02', 'Phuong Tam Phuoc-002': 'Bien Hoa 02',
+  'Phuong Long Binh-001': 'Bien Hoa 02', 'Phuong Ho Nai-001': 'Bien Hoa 02',
+  'Phuong Long Hung-002': 'Bien Hoa 02', 'Phuong Ho Nai-002': 'Bien Hoa 02',
+  'Phuong Tam Hiep-002': 'Bien Hoa 02',
+  'Xa Long Thanh-001': 'H.Long Thanh', 'Xa Phuoc Thai-001': 'H.Long Thanh',
+  'Xa Binh An-001': 'H.Long Thanh', 'Xa An Phuoc-001': 'H.Long Thanh',
+  'Xa Long Thanh-002': 'H.Long Thanh',
+  'Xa Nhon Trach-002': 'H.Nhon Trach', 'Xa Dai Phuoc-003': 'H.Nhon Trach',
+  'Xa Phuoc An-001': 'H.Nhon Trach',
+  'Xa Binh Minh-001': 'H.Trang Bom', 'Xa Trang Bom-001': 'H.Trang Bom',
+  'Xa Tri An-001': 'H.Trang Bom', 'Xa Hung Thinh-001': 'H.Trang Bom',
+  'Phuong Bao Vinh-001': 'TP.Long Khanh', 'Phuong Long Khanh-001': 'TP.Long Khanh',
+  'Xa Cam My-002': 'H.Cam My', 'Xa Xuan Dong-002': 'H.Cam My', 'Xa Xuan Dinh-001': 'H.Cam My',
+  'Xa Xuan Hoa-001': 'H.Xuan Loc', 'Xa Xuan Loc-001': 'H.Xuan Loc', 'Xa Xuan Thanh-001': 'H.Xuan Loc',
+  'Xa Tan Phu-001': 'H.Tan Phu', 'Xa Phu Lam-001': 'H.Tan Phu',
+  'Xa Dinh Quan-001': 'H.Dinh Quan', 'Xa La Nga-002': 'H.Dinh Quan',
+  'Xa Gia Kiem-001': 'H.Thong Nhat', 'Xa Thong Nhat-001': 'H.Thong Nhat',
+  'Phuong Binh Phuoc-001': 'Binh Phuoc', 'Phuong Chon Thanh-001': 'Binh Phuoc',
+  'Phuong Phuoc Long-001': 'Binh Phuoc'
+};
 
-  const partners = [...new Set(active.map(r => (r.doiTac || 'Không rõ').trim() || 'Không rõ'))].sort();
+// Thứ tự hiển thị Khu vực trên biểu đồ, nhóm theo đúng Đối tác như bảng gốc
+const KHUVUC_ORDER = [
+  'Bien Hoa 01', 'Bien Hoa 02',
+  'H.Trang Bom', 'H.Long Thanh', 'H.Nhon Trach',
+  'TP.Long Khanh', 'H.Xuan Loc', 'H.Cam My',
+  'H.Tan Phu', 'H.Dinh Quan', 'H.Thong Nhat',
+  'Binh Phuoc'
+];
+
+function getKhuVuc(r){
+  return BLOCK_TO_KHUVUC[String(r.block || '').trim()] || 'Khu vực khác';
+}
+
+function renderCharts(){
+  const active = getActiveRows();
+
+  // Duyệt DỮ LIỆU 1 LẦN DUY NHẤT để đếm theo Khu vực x mức khẩn, thay vì lồng
+  // filter (trước đây: khuVực × 5 mức khẩn × toàn bộ dòng = quét lại rất nhiều lần)
+  const countsByKhuVuc = {};
+  const doiTacByKhuVuc = {};
+  active.forEach(r => {
+    const kv = r.khuVuc;
+    if(!countsByKhuVuc[kv]){
+      countsByKhuVuc[kv] = { overdue:0, today:0, t1:0, t2:0, far:0 };
+      doiTacByKhuVuc[kv] = (r.doiTac || 'Không rõ').trim() || 'Không rõ';
+    }
+    countsByKhuVuc[kv][r.alert] = (countsByKhuVuc[kv][r.alert] || 0) + 1;
+  });
+
+  const khuVucSeen = Object.keys(countsByKhuVuc);
+  const khuVucList = [...KHUVUC_ORDER.filter(k => countsByKhuVuc[k]), ...khuVucSeen.filter(k => KHUVUC_ORDER.indexOf(k) === -1).sort()];
+
+  // Nhãn 2 tầng: dòng trên là Khu vực, dòng dưới là Đối tác tương ứng - Chart.js
+  // tự nhóm các cột có cùng nhãn cấp 2 (Đối tác) lại cạnh nhau kèm gạch phân cách
+  const labels = khuVucList.map(kv => [kv, doiTacByKhuVuc[kv] || '']);
 
   const datasets = ALERT_ORDER.map(key => ({
     label: ALERT_LABEL[key],
-    data: partners.map(p => active.filter(r => ((r.doiTac || 'Không rõ').trim() || 'Không rõ') === p && r.alert === key).length),
+    data: khuVucList.map(kv => countsByKhuVuc[kv][key] || 0),
     backgroundColor: ALERT_COLORS[key],
     stack: 'tonxuly'
   }));
@@ -310,7 +464,7 @@ function renderCharts(){
   if(chartDoiTac) chartDoiTac.destroy();
   chartDoiTac = new Chart(document.getElementById('chartDoiTac'), {
     type:'bar',
-    data:{ labels:partners, datasets },
+    data:{ labels, datasets },
     plugins:[totalLabelPlugin],
     options:{
       plugins:{
@@ -321,7 +475,7 @@ function renderCharts(){
         }
       },
       scales:{
-        x:{ stacked:true },
+        x:{ stacked:true, ticks:{ font:{ size:11 } } },
         y:{ stacked:true, beginAtZero:true, ticks:{precision:0}, grace:'10%' }
       }
     }
@@ -346,6 +500,55 @@ function populateNhanSuFilter(){
   sel.value = current;
 }
 
+// Phân loại chi tiết Loại triển khai: "Triển khai mới" tách thành
+// Onnet(CNB) / Onnet(Ngoại tĩnh) / Offnet; các loại khác giữ nguyên
+const CNB_SALE_PATTERN = /^(dni\.|bpc\.|pnc\.|hcm\.ecom\.|hni\.ecom\.|\d+$)/i;
+
+function classifyTrienKhai(r){
+  const loai = (r.loaiTrienKhai || '').trim();
+  if(!loai) return 'Không rõ';
+  if(loai !== 'Triển khai mới') return loai;
+
+  const goi = (r.goiDichVu || '').toLowerCase();
+  if(goi.indexOf('offnet') !== -1) return 'Triển khai mới - Offnet';
+
+  const sale = String(r.saleHD || '').trim();
+  const isCNB = CNB_SALE_PATTERN.test(sale);
+  return isCNB ? 'Triển khai mới - Onnet - CNB' : 'Triển khai mới - Onnet - Ngoại tĩnh';
+}
+
+// Thứ tự ưu tiên hiển thị: 3 nhóm con của "Triển khai mới" luôn đứng đầu (nếu có dữ liệu),
+// các loại triển khai khác xếp sau theo alphabet
+const TK_PRIORITY = ['Triển khai mới - Onnet - CNB', 'Triển khai mới - Onnet - Ngoại tĩnh', 'Triển khai mới - Offnet'];
+
+function renderTKFilterRow(){
+  const active = nonDoneRows;
+  const counts = {};
+  active.forEach(r => {
+    counts[r.tkCategory] = (counts[r.tkCategory] || 0) + 1;
+  });
+
+  const others = Object.keys(counts).filter(k => TK_PRIORITY.indexOf(k) === -1).sort();
+  const orderedCats = [...TK_PRIORITY.filter(k => counts[k]), ...others];
+
+  const container = document.getElementById('tkFilterRow');
+  const totalCount = active.length;
+
+  let html = `<button class="tk-btn${activeTKFilter === '' ? ' active' : ''}" onclick="setTKFilter('')">Tất cả<span class="count">${totalCount}</span></button>`;
+  orderedCats.forEach(cat => {
+    html += `<button class="tk-btn${activeTKFilter === cat ? ' active' : ''}" onclick="setTKFilter('${escapeHtml(cat).replace(/'/g,"\\'")}')">${escapeHtml(cat)}<span class="count">${counts[cat]}</span></button>`;
+  });
+  container.innerHTML = html;
+}
+
+function setTKFilter(cat){
+  activeTKFilter = cat;
+  renderTKFilterRow();
+  renderKPIs();
+  renderCharts();
+  renderTable();
+}
+
 function renderTable(){
   const q = document.getElementById('searchBox').value.trim().toLowerCase();
   const alertFilter = document.getElementById('filterAlert').value;
@@ -361,6 +564,7 @@ function renderTable(){
       const load = nhanSuLoadMap[(r.nhanSu||'').trim()] || 0;
       if(load <= OVERLOAD_THRESHOLD) return false;
     }
+    if(activeTKFilter && r.tkCategory !== activeTKFilter) return false;
     if(q){
       const hay = [r.soHD, r.tenKH, r.nhanSu, r.doiTac].join(' ').toLowerCase();
       if(hay.indexOf(q) === -1) return false;
@@ -419,6 +623,77 @@ function renderLoadBadge(nhanSu){
 function escapeHtml(v){
   if(v === null || v === undefined) return '';
   return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function switchTab(name){
+  document.getElementById('tab-overview').style.display = name === 'overview' ? '' : 'none';
+  document.getElementById('tab-khuvuc').style.display = name === 'khuvuc' ? '' : 'none';
+  document.getElementById('tabBtnOverview').classList.toggle('active', name === 'overview');
+  document.getElementById('tabBtnKhuVuc').classList.toggle('active', name === 'khuvuc');
+  if(name === 'khuvuc') renderKhuVucMatrix();
+}
+
+const KV_ALERT_COLS = ['overdue', 'today', 't1', 't2', 'far'];
+const KV_FIXED_CATEGORY = 'Triển khai mới - Onnet - CNB';
+
+function renderKhuVucMatrix(){
+  const rows = nonDoneRows.filter(r => r.tkCategory === KV_FIXED_CATEGORY);
+
+  const byDoiTac = {};
+  const doiTacOrder = [];
+  rows.forEach(r => {
+    const kv = r.khuVuc;
+    const dt = (r.doiTac || 'Không rõ').trim() || 'Không rõ';
+    if(!byDoiTac[dt]){ byDoiTac[dt] = {}; doiTacOrder.push(dt); }
+    if(!byDoiTac[dt][kv]) byDoiTac[dt][kv] = { overdue:0, today:0, t1:0, t2:0, far:0 };
+    byDoiTac[dt][kv][r.alert] = (byDoiTac[dt][kv][r.alert] || 0) + 1;
+  });
+  doiTacOrder.sort();
+
+  const headerCols = KV_ALERT_COLS.map(k => `<th>${ALERT_LABEL[k]}</th>`).join('');
+  let html = `<div class="table-wrap"><table class="kv-matrix"><thead><tr><th>Khu vực</th>${headerCols}<th>Tổng</th></tr></thead><tbody>`;
+
+  const grand = { overdue:0, today:0, t1:0, t2:0, far:0 };
+
+  if(doiTacOrder.length === 0){
+    html += `<tr><td colspan="7" style="text-align:center; color:var(--ink-soft); padding:20px;">Không có dữ liệu thuộc nhóm "${KV_FIXED_CATEGORY}"</td></tr>`;
+  }
+
+  doiTacOrder.forEach(dt => {
+    const khuVucMap = byDoiTac[dt];
+    const khuVucNames = [...KHUVUC_ORDER.filter(k => khuVucMap[k]), ...Object.keys(khuVucMap).filter(k => KHUVUC_ORDER.indexOf(k) === -1).sort()];
+    const subtotal = { overdue:0, today:0, t1:0, t2:0, far:0 };
+
+    // Tính tổng trước để đưa lên ngay dòng tiêu đề Đối tác, không cần dòng "Tổng ..." riêng nữa
+    khuVucNames.forEach(kv => {
+      const c = khuVucMap[kv];
+      KV_ALERT_COLS.forEach(k => subtotal[k] += (c[k] || 0));
+    });
+    const subTotalSum = KV_ALERT_COLS.reduce((s, k) => s + subtotal[k], 0);
+    KV_ALERT_COLS.forEach(k => grand[k] += subtotal[k]);
+
+    html += `<tr class="kv-group-header"><td>${escapeHtml(dt)}</td>` +
+      KV_ALERT_COLS.map(k => `<td>${subtotal[k]}</td>`).join('') +
+      `<td>${subTotalSum}</td></tr>`;
+
+    khuVucNames.forEach(kv => {
+      const c = khuVucMap[kv];
+      const total = KV_ALERT_COLS.reduce((s, k) => s + (c[k] || 0), 0);
+      html += `<tr><td>${escapeHtml(kv)}</td>` +
+        KV_ALERT_COLS.map(k => `<td class="kv-${k}">${c[k] || 0}</td>`).join('') +
+        `<td class="kv-total">${total}</td></tr>`;
+    });
+  });
+
+  if(doiTacOrder.length > 0){
+    const grandSum = KV_ALERT_COLS.reduce((s, k) => s + grand[k], 0);
+    html += `<tr class="kv-grandtotal"><td>TỔNG CỘNG</td>` +
+      KV_ALERT_COLS.map(k => `<td>${grand[k]}</td>`).join('') +
+      `<td>${grandSum}</td></tr>`;
+  }
+
+  html += '</tbody></table></div>';
+  document.getElementById('khuVucMatrixWrap').innerHTML = html;
 }
 
 loadData();
