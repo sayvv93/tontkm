@@ -240,8 +240,11 @@
         <option value="far">Chưa đến hạn</option>
         <option value="done">Đã xong</option>
       </select>
-      <select id="filterDoiTac" onchange="renderTable()">
+      <select id="filterDoiTac" onchange="onDoiTacChange()">
         <option value="">Tất cả đối tác</option>
+      </select>
+      <select id="filterKhuVuc" onchange="onKhuVucChange()">
+        <option value="">Tất cả khu vực</option>
       </select>
       <select id="filterNhanSu" onchange="renderTable()">
         <option value="">Tất cả nhân sự</option>
@@ -327,6 +330,7 @@ async function loadData(){
       'Cập nhật lúc ' + new Date(data.generatedAt).toLocaleString('vi-VN');
 
     populateDoiTacFilter();
+    populateKhuVucFilter();
     populateNhanSuFilter();
     renderTKFilterRow();
     computeNhanSuLoad();
@@ -492,12 +496,48 @@ function populateDoiTacFilter(){
 }
 
 function populateNhanSuFilter(){
+  updateNhanSuOptions();
+}
+
+function populateKhuVucFilter(){
+  updateKhuVucOptions();
+}
+
+function onDoiTacChange(){
+  updateKhuVucOptions();
+  updateNhanSuOptions();
+  renderTable();
+}
+
+function onKhuVucChange(){
+  updateNhanSuOptions();
+  renderTable();
+}
+
+function updateKhuVucOptions(){
+  const doiTac = document.getElementById('filterDoiTac').value;
+  const sel = document.getElementById('filterKhuVuc');
+  const current = sel.value;
+  const rows = doiTac ? allRows.filter(r => r.doiTac === doiTac) : allRows;
+  const seen = new Set(rows.map(r => r.khuVuc).filter(Boolean));
+  const values = [...KHUVUC_ORDER.filter(k => seen.has(k)), ...[...seen].filter(k => KHUVUC_ORDER.indexOf(k) === -1).sort()];
+  sel.innerHTML = '<option value="">Tất cả khu vực</option>' +
+    values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  sel.value = values.includes(current) ? current : '';
+}
+
+function updateNhanSuOptions(){
+  const doiTac = document.getElementById('filterDoiTac').value;
+  const khuVuc = document.getElementById('filterKhuVuc').value;
   const sel = document.getElementById('filterNhanSu');
   const current = sel.value;
-  const values = [...new Set(allRows.map(r=>r.nhanSu).filter(Boolean))].sort();
+  let rows = allRows;
+  if(doiTac) rows = rows.filter(r => r.doiTac === doiTac);
+  if(khuVuc) rows = rows.filter(r => r.khuVuc === khuVuc);
+  const values = [...new Set(rows.map(r=>r.nhanSu).filter(Boolean))].sort();
   sel.innerHTML = '<option value="">Tất cả nhân sự</option>' +
     values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-  sel.value = current;
+  sel.value = values.includes(current) ? current : '';
 }
 
 // Phân loại chi tiết Loại triển khai: "Triển khai mới" tách thành
@@ -553,12 +593,14 @@ function renderTable(){
   const q = document.getElementById('searchBox').value.trim().toLowerCase();
   const alertFilter = document.getElementById('filterAlert').value;
   const doiTacFilter = document.getElementById('filterDoiTac').value;
+  const khuVucFilter = document.getElementById('filterKhuVuc').value;
   const nhanSuFilter = document.getElementById('filterNhanSu').value;
   const onlyOverload = document.getElementById('onlyOverload').checked;
 
   let rows = allRows.filter(r=>{
     if(alertFilter && r.alert !== alertFilter) return false;
     if(doiTacFilter && r.doiTac !== doiTacFilter) return false;
+    if(khuVucFilter && r.khuVuc !== khuVucFilter) return false;
     if(nhanSuFilter && r.nhanSu !== nhanSuFilter) return false;
     if(onlyOverload){
       const load = nhanSuLoadMap[(r.nhanSu||'').trim()] || 0;
