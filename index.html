@@ -22,7 +22,8 @@
     --danger-bg:#fbeae8;
     --warn-bg:#fcf1de;
     --ok-bg:#e9f6ef;
-    --radius:10px;
+    --radius:12px;      /* thẻ nội dung: biểu đồ, bảng */
+    --radius-sm:8px;     /* nút, pill, ô chọn */
   }
   *{box-sizing:border-box;}
   body{
@@ -37,7 +38,23 @@
   }
   header .title{display:flex; flex-direction:column; gap:4px;}
   header h1{margin:0; font-size:21px; font-weight:700; letter-spacing:-0.01em;}
+
+  .shimmer-title{
+    background:linear-gradient(90deg, #ffffff 15%, #f7b98a 35%, var(--brand) 50%, #f7b98a 65%, #ffffff 85%);
+    background-size:250% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:shimmerMove 4.5s ease-in-out infinite alternate;
+  }
+  @keyframes shimmerMove{
+    0%{ background-position:0% center; }
+    100%{ background-position:100% center; }
+  }
   header .sub{font-size:13px; color:#c3cad3;}
+  .schedule-line{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .schedule-chip{
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+    border-radius:5px; padding:1px 7px; font-size:11.5px; font-weight:600; color:#dfe4e9;
+  }
   header .meta{display:flex; align-items:center; gap:16px; font-size:13px; color:#c9cfd6;}
   .dot{width:8px; height:8px; border-radius:50%; background:var(--ok); display:inline-block; margin-right:6px; box-shadow:0 0 0 3px rgba(31,138,95,.18);}
   #refreshBtn{
@@ -45,14 +62,14 @@
     font-size:13px; font-weight:600; cursor:pointer;
   }
   #refreshBtn:hover{opacity:.9;}
-  main{padding:28px 32px; max-width:1400px; margin:0 auto;}
+  main{padding:28px clamp(16px, 3vw, 48px); max-width:1800px; margin:0 auto;}
 
   .kpi-grid{
     display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:14px; margin-bottom:28px;
   }
   .kpi{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px 18px; position:relative; overflow:hidden; box-shadow:0 1px 2px rgba(28,36,48,.04);
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:16px 18px; position:relative; overflow:hidden;
   }
   .kpi .num{font-size:28px; font-weight:800; letter-spacing:-0.02em; line-height:1;}
   .kpi .label{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
@@ -80,12 +97,15 @@
   }
   .table-toolbar input[type=text]{flex:1; min-width:180px;}
 
-  .tk-filter-panel{margin-bottom:20px;}
-  .tk-filter-panel h2{margin-bottom:12px;}
+  .tk-filter-panel{
+    margin-bottom:24px; padding:16px 20px 18px; background:#fbfaf8;
+    border:1px solid var(--line); border-radius:var(--radius);
+  }
+  .tk-filter-panel h2{margin:0 0 12px; font-size:13px; text-transform:none; color:var(--ink-soft); font-weight:600;}
   .tk-filter-row{display:flex; flex-wrap:wrap; gap:8px;}
   .tk-btn{
-    border:1px solid var(--line); background:#fbfaf8; color:var(--ink-soft);
-    padding:8px 16px; border-radius:8px; font-size:13.5px; font-weight:600;
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft);
+    padding:8px 16px; border-radius:var(--radius-sm); font-size:13.5px; font-weight:600;
     cursor:pointer; white-space:nowrap; transition:background .12s ease, color .12s ease, border-color .12s ease;
   }
   .tk-btn:hover{background:#f0eee8; border-color:#d8d5cc;}
@@ -116,13 +136,22 @@
   #errState{color:var(--danger);}
   .footer-note{font-size:12px; color:var(--ink-soft); text-align:center; margin-top:20px;}
 
-  .dash-tabs{display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--line);}
+  .dash-tabs{display:flex; gap:6px; border-bottom:1px solid var(--line); margin-bottom:24px;}
   .dash-tab-btn{
     border:none; background:none; padding:10px 16px; font-size:14px; font-weight:600;
     color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
   }
   .dash-tab-btn:hover{color:var(--ink);}
   .dash-tab-btn.active{color:var(--brand); border-bottom-color:var(--brand);}
+
+  @keyframes tabAttentionPulse{
+    0%, 100% { box-shadow: 0 0 0 0 rgba(230,99,31,.35); color: var(--ink-soft); }
+    50% { box-shadow: 0 0 0 6px rgba(230,99,31,0); color: var(--brand); }
+  }
+  #tabBtnKhuVuc{
+    border-radius:7px; animation: tabAttentionPulse 2.2s ease-in-out infinite;
+  }
+  #tabBtnKhuVuc.active{animation:none; color:var(--brand);}
 
   table.kv-matrix{width:100%; border-collapse:collapse; font-size:11.5px; line-height:1.2;}
   table.kv-matrix th{
@@ -132,7 +161,7 @@
   table.kv-matrix th:first-child{text-align:left;}
   table.kv-matrix td{padding:3px 8px; border-bottom:1px solid #eeece6; text-align:right;}
   table.kv-matrix td:first-child{text-align:left;}
-  table.kv-matrix tr.kv-group-header td{background:#fdf3df; font-weight:700; color:#8a6d1d;}
+  table.kv-matrix tr.kv-group-header td{background:var(--warn-bg); font-weight:700; color:var(--warn);}
   table.kv-matrix tr.kv-group-header td:first-child{text-align:left;}
   table.kv-matrix tr.kv-subtotal td{background:#f5f4f0; font-weight:700;}
   table.kv-matrix tr.kv-grandtotal td{background:var(--ink); color:#fff; font-weight:800;}
@@ -172,8 +201,11 @@
 
 <header>
   <div class="title">
-    <h1>Dashboard theo dõi tồn <span style="color:var(--brand);">— Triển khai mới DNI</span></h1>
-    <span class="sub">Tồn cập nhật vào các khung giờ: 8h · 10h · 12h · 14h · 16h · 18h</span>
+    <h1 class="shimmer-title">DASHBOARD THEO DÕI TỒN TRIỂN KHAI CHI NHÁNH ĐỒNG NAI</h1>
+    <span class="sub schedule-line">
+      Tồn cập nhật vào các khung giờ
+      <span class="schedule-chip">8h</span><span class="schedule-chip">10h</span><span class="schedule-chip">12h</span><span class="schedule-chip">14h</span><span class="schedule-chip">16h</span><span class="schedule-chip">18h</span>
+    </span>
   </div>
   <div class="meta">
     <span><span class="dot" id="statusDot"></span><span id="lastUpdated">Đang tải…</span></span>
@@ -190,7 +222,7 @@
 
   <div id="tab-overview" class="dash-tab-content">
 
-  <div class="panel tk-filter-panel">
+  <div class="tk-filter-panel">
     <h2>Lọc theo loại triển khai</h2>
     <div class="tk-filter-row" id="tkFilterRow"></div>
   </div>
@@ -273,7 +305,7 @@
 
   <div id="tab-khuvuc" class="dash-tab-content" style="display:none;">
     <div class="panel">
-      <h2>Ma trận Khu vực — Triển khai mới (Onnet · CNB) theo mức độ khẩn</h2>
+      <h2>Triển khai mới — CNB theo Khu vực và mức độ khẩn</h2>
       <div id="khuVucMatrixWrap"></div>
     </div>
   </div>
@@ -541,25 +573,34 @@ function updateNhanSuOptions(){
 }
 
 // Phân loại chi tiết Loại triển khai: "Triển khai mới" tách thành
-// Onnet(CNB) / Onnet(Ngoại tĩnh) / Offnet; các loại khác giữ nguyên
+// CNB / Ngoại tỉnh / Gsafe; "Khách hàng mua/đổi thiết bị" tách riêng nhóm BT - Gsafe
+// theo đúng Sale HĐ chỉ định; các loại khác giữ nguyên
 const CNB_SALE_PATTERN = /^(dni\.|bpc\.|pnc\.|hcm\.ecom\.|hni\.ecom\.|\d+$)/i;
+const BT_GSAFE_EMAILS = ['duylh10@fpt.com', 'truongdv2@vienthongtin.com', 'phuocht@fpt.com'];
 
 function classifyTrienKhai(r){
   const loai = (r.loaiTrienKhai || '').trim();
   if(!loai) return 'Không rõ';
+
+  if(loai === 'Khách hàng mua/đổi thiết bị'){
+    const sale = String(r.saleHD || '').trim().toLowerCase();
+    if(BT_GSAFE_EMAILS.indexOf(sale) !== -1) return 'BT - Gsafe';
+    return loai;
+  }
+
   if(loai !== 'Triển khai mới') return loai;
 
   const goi = (r.goiDichVu || '').toLowerCase();
-  if(goi.indexOf('offnet') !== -1) return 'Triển khai mới - Offnet';
+  if(goi.indexOf('offnet') !== -1) return 'TK - Gsafe';
 
   const sale = String(r.saleHD || '').trim();
   const isCNB = CNB_SALE_PATTERN.test(sale);
-  return isCNB ? 'Triển khai mới - Onnet - CNB' : 'Triển khai mới - Onnet - Ngoại tĩnh';
+  return isCNB ? 'Triển khai mới - CNB' : 'Triển khai mới - Ngoại tỉnh';
 }
 
 // Thứ tự ưu tiên hiển thị: 3 nhóm con của "Triển khai mới" luôn đứng đầu (nếu có dữ liệu),
 // các loại triển khai khác xếp sau theo alphabet
-const TK_PRIORITY = ['Triển khai mới - Onnet - CNB', 'Triển khai mới - Onnet - Ngoại tĩnh', 'Triển khai mới - Offnet'];
+const TK_PRIORITY = ['Triển khai mới - CNB', 'Triển khai mới - Ngoại tỉnh', 'TK - Gsafe'];
 
 function renderTKFilterRow(){
   const active = nonDoneRows;
@@ -676,7 +717,7 @@ function switchTab(name){
 }
 
 const KV_ALERT_COLS = ['overdue', 'today', 't1', 't2', 'far'];
-const KV_FIXED_CATEGORY = 'Triển khai mới - Onnet - CNB';
+const KV_FIXED_CATEGORY = 'Triển khai mới - CNB';
 
 function renderKhuVucMatrix(){
   const rows = nonDoneRows.filter(r => r.tkCategory === KV_FIXED_CATEGORY);
