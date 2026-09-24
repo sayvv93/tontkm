@@ -173,6 +173,15 @@
   table.kv-matrix td.kv-total{font-weight:800; color:var(--ink);}
   #khuVucMatrixWrap .table-wrap{max-height:none;}
 
+  .block-debug-item{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding:8px 12px; border-bottom:1px solid #f3e5e2; font-size:13px;
+  }
+  .block-debug-item:last-child{border-bottom:none;}
+  .block-debug-item .bd-key{font-weight:600; color:var(--ink); font-family:monospace;}
+  .block-debug-item .bd-meta{color:var(--ink-soft); font-size:12px;}
+  .block-debug-item .bd-count{font-weight:700; color:var(--danger); white-space:nowrap;}
+
   .table-wrap{-webkit-overflow-scrolling:touch;}
   .dash-tabs{overflow-x:auto; -webkit-overflow-scrolling:touch;}
   .dash-tab-btn{flex:0 0 auto;}
@@ -301,6 +310,15 @@
     </div>
   </div>
 
+  <div class="panel" id="blockDebugPanel" style="display:none; border-color:#f0cfc9; background:#fffaf9;">
+    <h2 style="color:var(--danger);">⚠ Có Block chưa khớp được Khu vực</h2>
+    <p style="font-size:13px; color:var(--ink-soft); margin:0 0 12px;">
+      Các giá trị dưới đây (sau khi đã cắt 5 ký tự cuối) không tìm thấy trong bảng tra Khu vực,
+      đang tạm xếp vào "Khu vực khác". Gửi lại danh sách này kèm Khu vực đúng của từng cái để bổ sung vào bảng tra.
+    </p>
+    <div id="blockDebugList"></div>
+  </div>
+
   </div>
 
   <div id="tab-khuvuc" class="dash-tab-content" style="display:none;">
@@ -353,6 +371,7 @@ async function loadData(){
     // mỗi khi bấm lọc hoặc mỗi 2 phút tự làm mới - giờ chỉ tính 1 lần/dòng)
     allRows.forEach(r => {
       r.tkCategory = classifyTrienKhai(r);
+      r.blockKey = getBlockKey(r);
       r.khuVuc = getKhuVuc(r);
     });
     nonDoneRows = allRows.filter(r => !r.isDone);
@@ -370,6 +389,7 @@ async function loadData(){
     renderCharts();
     renderTable();
     renderKhuVucMatrix();
+    renderBlockDebug();
     document.getElementById('errState').style.display = 'none';
   }catch(err){
     document.getElementById('statusDot').style.background = '#c0392b';
@@ -463,8 +483,17 @@ const KHUVUC_ORDER = [
   'Binh Phuoc'
 ];
 
+function getBlockKey(r){
+  const raw = String(r.block || '').trim();
+  // Lấy đúng tới hết "-DDD" (vd -001, -002, -003), bỏ mọi phần phía sau (nếu có, vd "- L03");
+  // nếu dòng không có đuôi gì thêm thì giữ nguyên cả chuỗi
+  const m = raw.match(/^(.*-\d{3})/);
+  return m ? m[1] : raw;
+}
+
 function getKhuVuc(r){
-  return BLOCK_TO_KHUVUC[String(r.block || '').trim()] || 'Khu vực khác';
+  const key = getBlockKey(r);
+  return BLOCK_TO_KHUVUC[key] || 'Khu vực khác';
 }
 
 function renderCharts(){
@@ -706,6 +735,37 @@ function renderLoadBadge(nhanSu){
 function escapeHtml(v){
   if(v === null || v === undefined) return '';
   return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderBlockDebug(){
+  const unmatched = nonDoneRows.filter(r => r.khuVuc === 'Khu vực khác' && r.blockKey);
+  const panel = document.getElementById('blockDebugPanel');
+
+  if(unmatched.length === 0){
+    panel.style.display = 'none';
+    return;
+  }
+
+  const groups = {};
+  unmatched.forEach(r => {
+    if(!groups[r.blockKey]) groups[r.blockKey] = { count:0, doiTacSet:new Set() };
+    groups[r.blockKey].count++;
+    groups[r.blockKey].doiTacSet.add((r.doiTac || '').trim() || 'Không rõ');
+  });
+
+  const rows = Object.entries(groups).sort((a,b) => b[1].count - a[1].count);
+
+  document.getElementById('blockDebugList').innerHTML = rows.map(([key, info]) => `
+    <div class="block-debug-item">
+      <div>
+        <div class="bd-key">${escapeHtml(key)}</div>
+        <div class="bd-meta">Thuộc: ${escapeHtml([...info.doiTacSet].join(', '))}</div>
+      </div>
+      <div class="bd-count">${info.count} dòng</div>
+    </div>
+  `).join('');
+
+  panel.style.display = '';
 }
 
 function switchTab(name){
